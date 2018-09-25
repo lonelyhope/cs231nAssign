@@ -122,7 +122,7 @@ class Solver(object):
 
         # Unpack keyword arguments
         self.update_rule = kwargs.pop('update_rule', 'sgd')
-        self.optim_config = kwargs.pop('optim_config', {})
+        self.optim_config = kwargs.pop('optim_config', {}) # 保存优化参数？如learning rate等
         self.lr_decay = kwargs.pop('lr_decay', 1.0)
         self.batch_size = kwargs.pop('batch_size', 100)
         self.num_epochs = kwargs.pop('num_epochs', 10)
@@ -169,6 +169,7 @@ class Solver(object):
 
     def _step(self):
         """
+        进行梯度更新
         Make a single gradient update. This is called by train() and should not
         be called manually.
         """
@@ -179,16 +180,16 @@ class Solver(object):
         y_batch = self.y_train[batch_mask]
 
         # Compute loss and gradient
-        loss, grads = self.model.loss(X_batch, y_batch)
-        self.loss_history.append(loss)
+        loss, grads = self.model.loss(X_batch, y_batch) # 使用model的loss方法计算loss和梯度
+        self.loss_history.append(loss) # 将loss加入loss_history
 
         # Perform a parameter update
-        for p, w in self.model.params.items():
-            dw = grads[p]
-            config = self.optim_configs[p]
-            next_w, next_config = self.update_rule(w, dw, config)
-            self.model.params[p] = next_w
-            self.optim_configs[p] = next_config
+        for p, w in self.model.params.items(): # 更新所有model.params，即对model参数进行更新，此处为w1\w2\b1\b2
+            dw = grads[p] # 取得梯度
+            config = self.optim_configs[p] # 取得优化参数配置
+            next_w, next_config = self.update_rule(w, dw, config) # 将优化参数和梯度传入更新规则，得到更新后的模型参数，并返回更新后的config
+            self.model.params[p] = next_w # 更新模型参数（如w1\w2\b1\b2)
+            self.optim_configs[p] = next_config # 为每个模型更新config，用于下一次的update
 
 
     def _save_checkpoint(self):
@@ -249,7 +250,7 @@ class Solver(object):
             scores = self.model.loss(X[start:end])
             y_pred.append(np.argmax(scores, axis=1))
         y_pred = np.hstack(y_pred)
-        acc = np.mean(y_pred == y)
+        acc = np.mean(y_pred == y) # 计算数据X在模型中的预测正确率
 
         return acc
 

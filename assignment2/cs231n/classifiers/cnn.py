@@ -49,6 +49,16 @@ class ThreeLayerConvNet(object):
         # of the output affine layer.                                              #
         ############################################################################
         pass
+        # conv - relu - 2x2 max pool - affine - relu - affine - softmax
+        C, H, W = input_dim
+        self.params['W1'] = weight_scale * np.random.randn(num_filters, C, filter_size, filter_size)
+        self.params['b1'] = np.zeros(num_filters)
+
+        self.params['W2'] = weight_scale * np.random.randn((H//2)*(W//2)*num_filters, hidden_dim)
+        self.params['b2'] = np.zeros(hidden_dim)
+
+        self.params['W3'] = weight_scale * np.random.randn(hidden_dim, num_classes)
+        self.params['b3'] = np.zeros(num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -81,6 +91,13 @@ class ThreeLayerConvNet(object):
         # variable.                                                                #
         ############################################################################
         pass
+        # conv - relu - 2x2 max pool - affine - relu - affine - softmax
+        conv_out, conv_cache = conv_forward_fast(X, W1, b1, conv_param)
+        relu1_out, relu1_cache = relu_forward(conv_out)
+        pool_out, pool_cache = max_pool_forward_fast(relu1_out, pool_param)
+        fc1_out, fc1_cache = affine_forward(pool_out, W2, b2)
+        relu2_out, relu2_cache = relu_forward(fc1_out)
+        scores, fc2_cache = affine_forward(relu2_out, W3, b3)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -96,6 +113,24 @@ class ThreeLayerConvNet(object):
         # for self.params[k]. Don't forget to add L2 regularization!               #
         ############################################################################
         pass
+        # conv - relu - 2x2 max pool - affine - relu - affine - softmax
+        reg = self.reg
+        
+        loss, dout = softmax_loss(scores, y)
+        loss += reg * 0.5 * (np.sum(W1**2) + np.sum(W2**2) + np.sum(W3**2))
+        dfc2, dw3, db3 = affine_backward(dout, fc2_cache)
+        drelu2 = relu_backward(dfc2, relu2_cache)
+        dfc1, dw2, db2 = affine_backward(drelu2, fc1_cache)
+        dpool = max_pool_backward_fast(dfc1, pool_cache)
+        drelu1 = relu_backward(dpool, relu1_cache)
+        dx, dw1, db1 = conv_backward_fast(drelu1, conv_cache)
+
+        grads['W1'] = dw1 + reg * W1
+        grads['b1'] = db1
+        grads['W2'] = dw2 + reg * W2
+        grads['b2'] = db2
+        grads['W3'] = dw3 + reg * W3
+        grads['b3'] = db3
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
