@@ -1,0 +1,22 @@
+Metadata-Version: 2.0
+Name: sites
+Version: 0.0.1
+Summary: UNKNOWN
+Home-page: UNKNOWN
+Author: Joaquín Sorianello
+Author-email: joac@joac.com
+License: ?
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Utilities
+Requires-Dist: werkzeug
+Requires-Dist: aiocoap
+Requires-Dist: aiohttp
+
+sites provides a framework for building url based sites
+
+
